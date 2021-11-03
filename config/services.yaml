@@ -1,0 +1,14 @@
+services:
+  cli_app:
+    class: Symfony\Component\Console\Application
+    calls:
+      - add: [ '@run' ]
+      - run: [ ]
+
+  run:
+    class: App\Command\Run
+    arguments:
+      - '@database'
+
+  database:
+    factory: [ 'App\Factory\DataBaseFactory', 'createDatabase' ]
