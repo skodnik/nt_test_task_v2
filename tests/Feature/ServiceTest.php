@@ -6,6 +6,7 @@ use App\Factory\DataBaseFactory;
 use App\Model\Barcode;
 use App\Model\Order;
 use App\Controller\OrderProcessingController;
+use App\Model\OrderProcessingReport;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use PHPUnit\Framework\TestCase;
@@ -247,9 +248,10 @@ class ServiceTest extends TestCase
             /**
              * Успешная генерация уникального баркода.
              */
-            $result = $processing($order, self::ORDERS_TABLE_NAME);
-            $this->assertIsArray($result);
-        } catch (\RuntimeException $exception) {
+            $report = $processing($order, self::ORDERS_TABLE_NAME);
+//            dump($report->getArray());
+            $this->assertInstanceOf(OrderProcessingReport::class, $report);
+        } catch (RuntimeException $exception) {
             /**
              * Исчерпан лимит попыток перегенерации баркода.
              */
