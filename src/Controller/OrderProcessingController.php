@@ -66,14 +66,16 @@ class OrderProcessingController
             /**
              * Предварительное сохранение заказа в базе данных сервиса.
              */
-            $this->report->push($iteration, 2, 'Title', 'Preserve order in database');
+
             try {
                 if (1 === $iteration) {
+                    $this->report->push($iteration, 2, 'Title', 'Preserve order in database');
                     /**
                      * Заказ не существует в базе, т.е. выполняется первый проход.
                      */
                     $order->store($db, $orderTableName);
                 } else {
+                    $this->report->push($iteration, 2, 'Title', 'Update order in database');
                     /**
                      * Заказ ранее сохранен в базу, но требуется обновление баркода.
                      */

@@ -26,11 +26,11 @@
   "1": {
     "1": {
       "Title": "Generate barcode",
-      "Result": "barcode: 4551636053343587"
+      "Result": "barcode: 17051636057476121"
     },
     "2": {
       "Title": "Preserve order in database",
-      "Result": "orderId: 5"
+      "Result": "orderId: 40"
     },
     "3": {
       "Title": "Make booking API request",
@@ -40,11 +40,25 @@
   "2": {
     "1": {
       "Title": "Generate barcode",
-      "Result": "barcode: 4551636053343515"
+      "Result": "barcode: 17051636057476895"
     },
     "2": {
-      "Title": "Preserve order in database",
-      "Result": "orderId: 5"
+      "Title": "Update order in database",
+      "Result": "orderId: 40"
+    },
+    "3": {
+      "Title": "Make booking API request",
+      "Result": "{\"error\":\"barcode already exists\"}"
+    }
+  },
+  "3": {
+    "1": {
+      "Title": "Generate barcode",
+      "Result": "barcode: 17051636057476415"
+    },
+    "2": {
+      "Title": "Update order in database",
+      "Result": "orderId: 40"
     },
     "3": {
       "Title": "Make booking API request",
@@ -52,11 +66,11 @@
     },
     "4": {
       "Title": "Make approve API request",
-      "Result": "{\"message\":\"order successfully approved\"}"
+      "Result": "{\"error\":\"event cancelled\"}"
     },
     "5": {
-      "Title": "Confirm an order",
-      "Result": "Order stored successfully with barcode: 4551636053343515"
+      "Title": "Remove order from database",
+      "Result": "Removed"
     }
   }
 }
