@@ -155,7 +155,6 @@ CREATE TABLE orders
     event_id INTEGER,
     event_date DATETIME,
     user_id INTEGER(11),
-    equal_price INTEGER(11),
     created DATETIME DEFAULT NULL
 );
 ```
