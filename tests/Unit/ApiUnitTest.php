@@ -18,7 +18,8 @@ class ApiTest extends TestCase
             800,
             1,
             500,
-            0
+            0,
+            '4551636043593409'
         );
 
         $this->assertJson($responseBooking);

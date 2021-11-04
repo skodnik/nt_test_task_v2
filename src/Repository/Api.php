@@ -19,6 +19,7 @@ class Api
      * @param int $ticket_adult_quantity
      * @param int $ticket_kid_price
      * @param int $ticket_kid_quantity
+     * @param string $barcode
      * @return string
      */
     public static function bookOrder(
@@ -27,7 +28,8 @@ class Api
         int $ticket_adult_price,
         int $ticket_adult_quantity,
         int $ticket_kid_price,
-        int $ticket_kid_quantity
+        int $ticket_kid_quantity,
+        string $barcode
     ): string
     {
         $responses = [

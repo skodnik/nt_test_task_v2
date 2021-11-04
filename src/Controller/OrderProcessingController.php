@@ -95,6 +95,7 @@ class OrderProcessingController
                 $order->getTicketAdultQuantity(),
                 $order->getTicketKidPrice(),
                 $order->getTicketKidQuantity(),
+                $order->getBarcode()
             );
             $result[$i]['Step 3']['Result'] = $responseBooking;
 
