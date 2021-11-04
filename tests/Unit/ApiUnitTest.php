@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 class ApiTest extends TestCase
 {
     /**
-     * Бронирование заказа в API.
+     * Бронирование заказа.
      */
     public function test_bookOrder(): void
     {
@@ -26,7 +26,7 @@ class ApiTest extends TestCase
     }
 
     /**
-     * Подтверждение заказа в API.
+     * Подтверждение заказа.
      */
     public function test_approveOrder(): void
     {
