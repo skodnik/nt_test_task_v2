@@ -222,39 +222,46 @@ class ServiceTest extends TestCase
      */
     public function test_orderProcessingController(): void
     {
-        $userId = 455;
-        $eventId = 5;
-        $eventDate = '2021-11-03 10:36:35';
-        $adultPrice = rand(500, 900);
-        $adultQuantity = rand(0, 10);
-        $kidPrice = rand(300, 500);
-        $kidQuantity = rand(0, 10);
-        $barcode = '4551636043593409';
+        /**
+         * В целях проверки максимального количества возможных вариантов сочетания условий обработки заказа,
+         * количество тестовых заказов, подлежащих последовательному процессингу,
+         * определяется переменной $orderQuantity.
+         */
+        for ($orderQuantity = 1; $orderQuantity <= 500; $orderQuantity++) {
+            $userId = rand(1, 5000);
+            $eventId = rand(1, 500);
+            $eventDate = date('Y-m-d H:i:s');
+            $adultPrice = rand(500, 900);
+            $adultQuantity = rand(0, 10);
+            $kidPrice = rand(300, 500);
+            $kidQuantity = rand(0, 10);
+            $barcode = Barcode::getNew($userId);
 
-        $order = $this->makeOrder(
-            $userId,
-            $eventId,
-            $eventDate,
-            $adultPrice,
-            $adultQuantity,
-            $kidPrice,
-            $kidQuantity,
-            $barcode
-        );
+            $order = $this->makeOrder(
+                $userId,
+                $eventId,
+                $eventDate,
+                $adultPrice,
+                $adultQuantity,
+                $kidPrice,
+                $kidQuantity,
+                $barcode
+            );
 
-        $processing = new OrderProcessingController();
+            $processing = new OrderProcessingController();
 
-        try {
-            /**
-             * Успешная генерация уникального баркода.
-             */
-            $report = $processing($order, self::ORDERS_TABLE_NAME);
-            $this->assertInstanceOf(OrderProcessingReport::class, $report);
-        } catch (RuntimeException $exception) {
-            /**
-             * Исчерпан лимит попыток перегенерации баркода.
-             */
-            $this->assertTrue(true);
+            try {
+                /**
+                 * Успешная генерация уникального баркода.
+                 */
+                $report = $processing($order, self::ORDERS_TABLE_NAME);
+                $this->assertInstanceOf(OrderProcessingReport::class, $report);
+            } catch (RuntimeException $exception) {
+                /**
+                 * Исчерпан лимит попыток перегенерации баркода.
+                 */
+                $this->assertTrue(true);
+            }
         }
     }
 

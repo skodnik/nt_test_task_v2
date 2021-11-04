@@ -92,7 +92,7 @@ composer install
 7. подтверждения заказа в базе данных,
 8. бронирования заказа во внешнем сервисе через API,
 9. подтверждения заказа во внешнем сервисе через API,
-10. алгоритма обработки заказа контроллером,
+10. алгоритма обработки заказов (в текущей реализации 500 штук) контроллером,
 11. формирования отчета процессинга заказа и его методов.
 
 Для запуска тестов необходимо выполнить в консоли.
@@ -128,12 +128,11 @@ Service
  ✔ Store order  1 ms
  ✔ Store order with not unique barcode exception  1 ms
  ✔ Confirm order  1 ms
- ✔ Order processing controller  1 ms
+ ✔ Order processing controller  368 ms
 
-Time: 00:00.012, Memory: 6.00 MB
+Time: 00:00.380, Memory: 8.00 MB
 
-OK (15 tests, 20 assertions)
-
+OK (15 tests, 518 assertions)
 ```
 
 ## Задание 2
