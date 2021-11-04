@@ -18,7 +18,67 @@
 - если бронь не подтверждена, предсохраненный заказ удаляется из базы данных сервиса.
 
 ### Важные замечания
-Класс `OrderProcessingController`, как и прочие сущесвенные с т.з. сервиса классы, содержит исчерпывающие комментарии по своей структуре. Метод обработчик формирует и возвращает переменную массив - отчет о выполненных шагах. Дамп отчета можно использовать для более подробного анализа работы сервиса.
+Класс `OrderProcessingController`, как и прочие сущесвенные с т.з. сервиса классы, содержит исчерпывающие комментарии по своей структуре. 
+
+Метод обработчик формирует и возвращает переменную массив - отчет о выполненных шагах. Дамп отчета можно использовать для более подробного анализа работы сервиса. Отчет целесообразнее реализовать в форме DTO. В текущей реализации ринимает вид массива:
+```php
+[
+  1 => [
+    "Step 1" => [
+      "Title" => "Generate barcode",
+      "Result" => "4551636009730230"
+    ],
+    "Step 2" => [
+      "Title" => "Preserve order in database",
+      "Result" => "orderId: 5"
+    ],
+    "Step 3" => [
+      "Title" => "Make booking API request",
+      "Result" => "{\"error\":\"barcode already exists\"}"
+    ]
+  ]
+  2 => [
+    "Step 1" => [
+      "Title" => "Generate barcode",
+      "Result" => "4551636009730887"
+    ],
+    "Step 2" => [
+      "Title" => "Preserve order in database",
+      "Result" => "orderId: 5"
+    ],
+    "Step 3" => [
+      "Title" => "Make booking API request",
+      "Result" => "{\"error\":\"barcode already exists\"}"
+    ]
+  ]
+  3 => [
+    "Step 1" => [
+      "Title" => "Generate barcode",
+      "Result" => "4551636009730288"
+    ],
+    "Step 2" => [
+      "Title" => "Preserve order in database",
+      "Result" => "orderId: 5"
+    ],
+    "Step 3" => [
+      "Title" => "Make booking API request",
+      "Result" => "{\"message\":\"order successfully booked\"}"
+    ],
+    "Step 4" => [
+      "Title" => "Make approve API request",
+      "Result" => "{\"error\":\"fan removed\"}"
+    ],
+    "Step 5" => [
+      "Title" => "Remove order from database",
+      "Result" => "Removed"
+    ]
+  ]
+]
+```
+
+Код тестов подлежит оптимизации за счет выноса миграций и сидеров за его пределы.
+
+В реальном проекте, тестирование методов контроллера следует выполнять в иной форме.
 
 Сервис содержит консольное приложение `./cli`, при необходимости его можно использовать для расширенного тестирования сервиса средствами cli. Для запуска и получения перечня доступных команд выполнить в консоли:
 ```bash
@@ -44,7 +104,9 @@ composer install
 5. проверка предсохранения заказа в базе данных сервиса,
 6. проверка корректной обработки ошибки сохранения заказа с существующим баркодом,
 7. проверка подтверждения заказа в базе данных,
-8. проверка алгоритма обработки заказа контроллером.
+8. проверка бронирования заказа во внешнем сервисе через API,
+9. проверка подтверждения заказа во внешнем сервисе через API,
+10. проверка алгоритма обработки заказа контроллером.
 
 Для запуска тестов необходимо выполнить в консоли.
 ```bash
@@ -59,19 +121,20 @@ Runtime:       PHP 8.0.10
 Configuration: /Users/vlsv/PhpStormProjects/_tmp/nevatrip_2/phpunit.xml
 
 Service
- ✔ Get all users  3 ms
+ ✔ Get all users  2 ms
  ✔ Get all orders  1 ms
  ✔ Get new barcode  1 ms
  ✔ Make order  1 ms
  ✔ Store order  1 ms
- ✔ Store order with not unique barcode exception  3 ms
+ ✔ Store order with not unique barcode exception  1 ms
  ✔ Confirm order  1 ms
- ✔ Order processing controller  2 ms
+ ✔ Book order via api  1 ms
+ ✔ Approve order via api  1 ms
+ ✔ Order processing controller  1 ms
 
-Time: 00:00.018, Memory: 6.00 MB
+Time: 00:00.012, Memory: 6.00 MB
 
-OK (8 tests, 12 assertions)
-
+OK (10 tests, 14 assertions)
 ```
 
 ## Задание 2

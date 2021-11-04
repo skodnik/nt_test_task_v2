@@ -39,11 +39,6 @@ class OrderProcessingController
         $db = DataBaseFactory::createDatabase()->getConnection();
 
         /**
-         * Переменная маркер определяющая необходимость повторения попыток обработки заказа.
-         */
-        $needToGo = true;
-
-        /**
          * Переменная итератор.
          */
         $i = 1;
@@ -52,7 +47,7 @@ class OrderProcessingController
          * Цикл обработки заказа формирующий уникальный, несуществующий
          * ни в базе данных сервиса, ни во внешнем сервисе вызываемом по API.
          */
-        while ($needToGo) {
+        while (true) {
             $result[$i]['Step 1']['Title'] = 'Generate barcode';
             /**
              * Создание баркода.
@@ -83,13 +78,13 @@ class OrderProcessingController
                 $i++;
 
                 /**
-                 * Переход на следующую итерацию цикла, т.к. новый баркод существет в базе.
+                 * Переход на следующую итерацию цикла, т.к. переданный баркод существует в базе данных сервиса.
                  */
                 continue;
             }
             $result[$i]['Step 2']['Result'] = 'orderId: ' . $order->getId();
 
-            $result[$i]['Step 3']['Title'] = 'Make booking API request #' . $i;
+            $result[$i]['Step 3']['Title'] = 'Make booking API request';
             /**
              * Запрос брони заказа по API.
              */
@@ -106,21 +101,23 @@ class OrderProcessingController
             $responseBookingArray = json_decode($responseBooking, true);
 
             /**
-             * Если в ответе содержится поле 'error' необходим новый проход.
+             * Если в ответе содержится поле 'error' необходим новый проход, в противном случе, выход из цикла.
              */
-            $needToGo = key_exists('error', $responseBookingArray);
+            if(key_exists('error', $responseBookingArray)) {
+                /**
+                 * Условие контролирующее количество попыток получения подтверждения заказа.
+                 */
+                if ($i >= (int)App::env('ATTEMPTS_COUNT_TO_CALL_THE_API')) {
+                    throw new RuntimeException('Failed barcode validation in external API');
+                }
 
-            /**
-             * Условие контролирующее количество попыток получения подтверждения заказа.
-             */
-            if ($i >= (int)App::env('ATTEMPTS_COUNT_TO_CALL_THE_API')) {
-                throw new RuntimeException('Failed barcode validation in external API');
+                /**
+                 * Инкрементальное увеличение маркера итератора.
+                 */
+                $i++;
+            } else {
+                break;
             }
-
-            /**
-             * Инкрементальной увеличение маркера итератора.
-             */
-            $i++;
         }
 
         $result[$i]['Step 4']['Title'] = 'Make approve API request';

@@ -6,6 +6,7 @@ use App\Factory\DataBaseFactory;
 use App\Model\Barcode;
 use App\Model\Order;
 use App\Controller\OrderProcessingController;
+use App\Repository\Api;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use PHPUnit\Framework\TestCase;
@@ -221,6 +222,37 @@ class ServiceTest extends TestCase
         $this->db->fetchAllAssociative($sql)[0];
 
         $this->assertNotNull($order->getCreated());
+    }
+
+    /**
+     * Бронирование заказа в API.
+     *
+     * @depends test_makeOrder
+     */
+    public function test_bookOrderViaApi(Order $order)
+    {
+        $responseBooking = Api::bookOrder(
+            $order->getEventId(),
+            $order->getEventDate(),
+            $order->getTicketAdultPrice(),
+            $order->getTicketAdultQuantity(),
+            $order->getTicketKidPrice(),
+            $order->getTicketKidQuantity(),
+        );
+
+        $this->assertJson($responseBooking);
+    }
+
+    /**
+     * Подтверждение заказа в API.
+     *
+     * @depends test_makeOrder
+     */
+    public function test_approveOrderViaApi(Order $order)
+    {
+        $responseApprove = Api::approveOrder($order->getBarcode());
+
+        $this->assertJson($responseApprove);
     }
 
     /**
