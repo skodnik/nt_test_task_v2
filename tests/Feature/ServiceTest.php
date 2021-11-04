@@ -6,7 +6,6 @@ use App\Factory\DataBaseFactory;
 use App\Model\Barcode;
 use App\Model\Order;
 use App\Controller\OrderProcessingController;
-use App\Repository\Api;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use PHPUnit\Framework\TestCase;
@@ -72,7 +71,7 @@ class ServiceTest extends TestCase
      *
      * @throws \Doctrine\DBAL\Exception
      */
-    public function test_getAllUsers()
+    public function test_getAllUsers(): void
     {
         $users = $this->db->fetchAllAssociative('SELECT * FROM ' . self::USERS_TABLE_NAME);
 
@@ -84,7 +83,7 @@ class ServiceTest extends TestCase
      *
      * @throws \Doctrine\DBAL\Exception
      */
-    public function test_getAllOrders()
+    public function test_getAllOrders(): void
     {
         $orders = $this->db->fetchAllAssociative('SELECT * FROM ' . self::ORDERS_TABLE_NAME);
 
@@ -92,38 +91,27 @@ class ServiceTest extends TestCase
     }
 
     /**
-     * Генерация баркода и проверка его структуры.
-     */
-    public function test_GetNewBarcode()
-    {
-        $userId = 451;
-        $barcode = Barcode::getNew($userId);
-
-        $this->assertStringStartsWith((string)$userId, $barcode);
-    }
-
-    /**
      * Вспомогательный метод создания объекта заказа.
      *
-     * @param $userId
-     * @param $eventId
-     * @param $eventDate
-     * @param $adultPrice
-     * @param $adultQuantity
-     * @param $kidPrice
-     * @param $kidQuantity
+     * @param int $userId
+     * @param int $eventId
+     * @param string $eventDate
+     * @param int $adultPrice
+     * @param int $adultQuantity
+     * @param int $kidPrice
+     * @param int $kidQuantity
      * @param string $barcode
      * @return Order
      */
     private function makeOrder(
-        $userId,
-        $eventId,
-        $eventDate,
-        $adultPrice,
-        $adultQuantity,
-        $kidPrice,
-        $kidQuantity,
-        $barcode = ''
+        int $userId,
+        int $eventId,
+        string $eventDate,
+        int $adultPrice,
+        int $adultQuantity,
+        int $kidPrice,
+        int $kidQuantity,
+        string $barcode
     ): Order {
         return (new Order())
             ->setEventId($eventId)
@@ -181,7 +169,7 @@ class ServiceTest extends TestCase
      * @depends test_makeOrder
      * @throws \Doctrine\DBAL\Exception
      */
-    public function test_storeOrder(Order $order)
+    public function test_storeOrder(Order $order): Order
     {
         $order->store($this->db, self::ORDERS_TABLE_NAME);
 
@@ -200,8 +188,9 @@ class ServiceTest extends TestCase
      * Попытка предсохранения заказа содержащего баркод заведомо существующий в базе данных сервиса.
      *
      * @depends test_makeOrder
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function test_storeOrderWithNotUniqueBarcodeException(Order $order)
+    public function test_storeOrderWithNotUniqueBarcodeException(Order $order): void
     {
         $this->expectException(UniqueConstraintViolationException::class);
 
@@ -212,8 +201,9 @@ class ServiceTest extends TestCase
      * Подтверждение заказа в базе данных через установку значения поля created.
      *
      * @depends test_makeOrder
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function test_confirmOrder(Order $order)
+    public function test_confirmOrder(Order $order): void
     {
         $order->confirm($this->db, self::ORDERS_TABLE_NAME);
 
@@ -225,42 +215,11 @@ class ServiceTest extends TestCase
     }
 
     /**
-     * Бронирование заказа в API.
-     *
-     * @depends test_makeOrder
-     */
-    public function test_bookOrderViaApi(Order $order)
-    {
-        $responseBooking = Api::bookOrder(
-            $order->getEventId(),
-            $order->getEventDate(),
-            $order->getTicketAdultPrice(),
-            $order->getTicketAdultQuantity(),
-            $order->getTicketKidPrice(),
-            $order->getTicketKidQuantity(),
-        );
-
-        $this->assertJson($responseBooking);
-    }
-
-    /**
-     * Подтверждение заказа в API.
-     *
-     * @depends test_makeOrder
-     */
-    public function test_approveOrderViaApi(Order $order)
-    {
-        $responseApprove = Api::approveOrder($order->getBarcode());
-
-        $this->assertJson($responseApprove);
-    }
-
-    /**
      * Обращение к контроллеру процессинга заказа.
      *
      * @throws \Doctrine\DBAL\Exception
      */
-    public function test_orderProcessingController()
+    public function test_orderProcessingController(): void
     {
         $userId = 455;
         $eventId = 5;
@@ -269,6 +228,7 @@ class ServiceTest extends TestCase
         $adultQuantity = rand(0, 10);
         $kidPrice = rand(300, 500);
         $kidQuantity = rand(0, 10);
+        $barcode = '4551636043593409';
 
         $order = $this->makeOrder(
             $userId,
@@ -277,7 +237,8 @@ class ServiceTest extends TestCase
             $adultPrice,
             $adultQuantity,
             $kidPrice,
-            $kidQuantity
+            $kidQuantity,
+            $barcode
         );
 
         $processing = new OrderProcessingController();
@@ -297,7 +258,7 @@ class ServiceTest extends TestCase
     }
 
     /**
-     * Возврат состояния окружения к исходному состоянию.
+     * Возврат состояния окружения к исходному.
      *
      * @throws \Doctrine\DBAL\Exception
      */
