@@ -20,60 +20,46 @@
 ### Важные замечания
 Класс `OrderProcessingController`, как и прочие существенные с т.з. сервиса классы, содержит исчерпывающие комментарии по своей структуре. 
 
-Метод обработчик формирует и возвращает переменную массив - отчет о выполненных шагах. Дамп отчета можно использовать для более подробного анализа работы сервиса. Отчет целесообразнее реализовать в форме DTO. В текущей реализации принимает вид массива:
-```php
-[
-  1 => [
-    "Step 1" => [
-      "Title" => "Generate barcode",
-      "Result" => "4551636009730230"
-    ],
-    "Step 2" => [
-      "Title" => "Preserve order in database",
-      "Result" => "orderId: 5"
-    ],
-    "Step 3" => [
-      "Title" => "Make booking API request",
-      "Result" => "{\"error\":\"barcode already exists\"}"
-    ]
-  ]
-  2 => [
-    "Step 1" => [
-      "Title" => "Generate barcode",
-      "Result" => "4551636009730887"
-    ],
-    "Step 2" => [
-      "Title" => "Preserve order in database",
-      "Result" => "orderId: 5"
-    ],
-    "Step 3" => [
-      "Title" => "Make booking API request",
-      "Result" => "{\"error\":\"barcode already exists\"}"
-    ]
-  ]
-  3 => [
-    "Step 1" => [
-      "Title" => "Generate barcode",
-      "Result" => "4551636009730288"
-    ],
-    "Step 2" => [
-      "Title" => "Preserve order in database",
-      "Result" => "orderId: 5"
-    ],
-    "Step 3" => [
-      "Title" => "Make booking API request",
-      "Result" => "{\"message\":\"order successfully booked\"}"
-    ],
-    "Step 4" => [
-      "Title" => "Make approve API request",
-      "Result" => "{\"error\":\"fan removed\"}"
-    ],
-    "Step 5" => [
-      "Title" => "Remove order from database",
-      "Result" => "Removed"
-    ]
-  ]
-]
+Метод обработчик формирует и возвращает объект - отчет о выполненных шагах. Дамп отчета можно использовать для более подробного анализа работы сервиса. Вариант дампа отчета в json.
+```json
+{
+  "1": {
+    "1": {
+      "Title": "Generate barcode",
+      "Result": "barcode: 4551636053343587"
+    },
+    "2": {
+      "Title": "Preserve order in database",
+      "Result": "orderId: 5"
+    },
+    "3": {
+      "Title": "Make booking API request",
+      "Result": "{\"error\":\"barcode already exists\"}"
+    }
+  },
+  "2": {
+    "1": {
+      "Title": "Generate barcode",
+      "Result": "barcode: 4551636053343515"
+    },
+    "2": {
+      "Title": "Preserve order in database",
+      "Result": "orderId: 5"
+    },
+    "3": {
+      "Title": "Make booking API request",
+      "Result": "{\"message\":\"order successfully booked\"}"
+    },
+    "4": {
+      "Title": "Make approve API request",
+      "Result": "{\"message\":\"order successfully approved\"}"
+    },
+    "5": {
+      "Title": "Confirm an order",
+      "Result": "Order stored successfully with barcode: 4551636053343515"
+    }
+  }
+}
 ```
 
 Код тестов подлежит оптимизации за счет выноса миграций и сидеров за его пределы.
@@ -96,17 +82,18 @@ composer install
 ```
 
 ### Оценка работоспособности сервиса
-Вызов `__invoke` метода `OrderProcessingController` контроллера осуществляется средствами функциональных тестов реализованных с помощью пакета `phpunit/phpunit`. В рамках тестирования выполняется:
+Вызов `__invoke` метода `OrderProcessingController` контроллера осуществляется средствами функциональных тестов реализованных с помощью пакета `phpunit/phpunit`. В рамках тестирования выполняются проверки:
 1. инициализация таблиц базы данных: `users` и `orders`, предварительное их наполнение данными из тестового задания,
-2. проверка получения полного перечня пользователей и заказов из базы данных сервиса,
-3. проверка формирования баркода и его содержания,
-4. проверка успешного создания заказа,
-5. проверка предсохранения заказа в базе данных сервиса,
-6. проверка корректной обработки ошибки сохранения заказа с существующим баркодом,
-7. проверка подтверждения заказа в базе данных,
-8. проверка бронирования заказа во внешнем сервисе через API,
-9. проверка подтверждения заказа во внешнем сервисе через API,
-10. проверка алгоритма обработки заказа контроллером.
+2. получения полного перечня пользователей и заказов из базы данных сервиса,
+3. формирования баркода и его содержания,
+4. успешного создания заказа,
+5. предсохранения заказа в базе данных сервиса,
+6. корректной обработки ошибки сохранения заказа с существующим баркодом,
+7. подтверждения заказа в базе данных,
+8. бронирования заказа во внешнем сервисе через API,
+9. подтверждения заказа во внешнем сервисе через API,
+10. алгоритма обработки заказа контроллером,
+11. формирования отчета процессинга заказа и его методов.
 
 Для запуска тестов необходимо выполнить в консоли.
 ```bash
@@ -120,21 +107,33 @@ PHPUnit 9.5.10 by Sebastian Bergmann and contributors.
 Runtime:       PHP 8.0.10
 Configuration: /Users/vlsv/PhpStormProjects/_tmp/nevatrip_2/phpunit.xml
 
-Service
- ✔ Get all users  2 ms
- ✔ Get all orders  1 ms
+Api
+ ✔ Book order  2 ms
+ ✔ Approve order  1 ms
+
+Barcode
  ✔ Get new barcode  1 ms
+
+Order Processing Report
+ ✔ Create report  1 ms
+ ✔ Get exception  1 ms
+ ✔ Push  1 ms
+ ✔ Get array  1 ms
+ ✔ Get json  1 ms
+
+Service
+ ✔ Get all users  1 ms
+ ✔ Get all orders  1 ms
  ✔ Make order  1 ms
  ✔ Store order  1 ms
  ✔ Store order with not unique barcode exception  1 ms
  ✔ Confirm order  1 ms
- ✔ Book order via api  1 ms
- ✔ Approve order via api  1 ms
  ✔ Order processing controller  1 ms
 
 Time: 00:00.012, Memory: 6.00 MB
 
-OK (10 tests, 14 assertions)
+OK (15 tests, 20 assertions)
+
 ```
 
 ## Задание 2
