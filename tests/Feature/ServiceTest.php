@@ -249,7 +249,6 @@ class ServiceTest extends TestCase
              * Успешная генерация уникального баркода.
              */
             $report = $processing($order, self::ORDERS_TABLE_NAME);
-//            dump($report->getArray());
             $this->assertInstanceOf(OrderProcessingReport::class, $report);
         } catch (RuntimeException $exception) {
             /**
